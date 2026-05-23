@@ -32,12 +32,17 @@ npm test           # CRA test runner — currently BROKEN
 
 ## High-level architecture
 
-The app is intentionally simple: **one giant component (`App`) holds all game state and mutator functions**, persists every change to Firestore, and re-renders when Firestore pushes an update. There is no Redux/Zustand/Context — state is local `useState` synced with a remote document.
+`App` holds all game state (`useState`) and re-renders when Firestore pushes an update. There is no Redux/Zustand/Context — state is local `useState` synced with a remote document. Game logic has been extracted into custom hooks and modal components to keep App.js manageable (~550 lines):
+
+- **`useRoomSync`** — Firestore subscription + initial fetch
+- **`useLogWatcher`** — log-driven SFX, win/lose modal trigger
+- **`useGameActions`** — all 36 click handlers + 15 mutator helpers
+- **`src/components/modals/`** — 5 modal components (ConfirmCard, Detail, Other, PickHero, Endgame)
 
 ### Data flow per action
 
 1. User clicks something in the UI (e.g. play a card, draw, end turn).
-2. The matching handler in [src/App.js](src/App.js) builds a local `state = { log, rule, players, deck }` snapshot.
+2. The matching handler in [src/hooks/useGameActions.js](src/hooks/useGameActions.js) builds a local `state = { log, rule, players, deck }` snapshot.
 3. Helper mutators (`addCardToTrash`, `playerTakeDamage`, `removeCardFromHand`, etc.) mutate that snapshot in place AND call the corresponding `setX` setter for an optimistic local update.
 4. `addLog(state, msg)` appends a Thai log line.
 5. `delay(() => updateData(state, mainState, { roomId }))` pushes the new state to Firestore.
@@ -93,8 +98,12 @@ The `Player` class lives at [src/classes/Player.js](src/classes/Player.js) and i
 
 ## Source layout
 
-- [src/App.js](src/App.js) — ~1.7k lines. The whole UI + every game action handler. When adding game mechanics, this is almost always the file you touch.
+- [src/App.js](src/App.js) — ~550 lines. UI layout, `useState` declarations, refs, and top-level render. Game action handlers are in `useGameActions`. When adding game mechanics, open `useGameActions.js` first; only touch `App.js` for UI/layout changes.
 - [src/index.js](src/index.js), [src/firebase.js](src/firebase.js) — bootstrap and Firebase client.
+- [src/hooks/](src/hooks/) — custom hooks:
+  - [useRoomSync.js](src/hooks/useRoomSync.js) — Firestore `onSnapshot` subscription + `fetchInitData` on mount. Calls `setPlayers/setDeck/setRule/setLog`.
+  - [useLogWatcher.js](src/hooks/useLogWatcher.js) — watches `log` array; plays SFX and triggers win/lose modal (`modalTrigger5`) from Thai log substrings.
+  - [useGameActions.js](src/hooks/useGameActions.js) — all 36 click handlers (`endTurnClicked`, `drawClicked`, `judgementActionClicked`, etc.) and 15 mutator helpers (`addLog`, `addCardToTrash`, `playerTakeDamage`, …). Accepts all state + setters as a single `deps` object and returns named handler functions.
 - [src/classes/](src/classes/) — game data and pure-ish logic:
   - [Card.js](src/classes/Card.js) — `Card` class, the **138-card `masterDeck`**, Thai translations (`masterTrans`), helpers like `mapMasterDeck(id)` and `searchCardAction`.
   - [Warlord.js](src/classes/Warlord.js) — `Warlord` class, the **~80-warlord `initWarlords` roster**, Thai skill text (`warlordTrans`), helpers like `hasSkillButton` / `hasChallengePointButton`.
@@ -103,12 +112,18 @@ The `Player` class lives at [src/classes/Player.js](src/classes/Player.js) and i
   - [DataInit.js](src/classes/DataInit.js) — builds `initState` (random teams, shuffled deck, warlord pool of 3 per player) and exposes `addInit` / `resetInit` to create or reset a Firestore room.
   - [ApiService.js](src/classes/ApiService.js) — `fetchInitData`, `updateData` thin wrappers over Firestore.
   - [Audio.js](src/classes/Audio.js) — static class of named sound effects sourced from `src/audio/*`.
+  - [playSoundByAction.js](src/classes/playSoundByAction.js) — maps card `action` strings to `PlayAudio.*` calls. Used by `useLogWatcher` and `useGameActions`.
   - [Utils.js](src/classes/Utils.js) — `delay`, `randomId`, `randomIdOnlynumber`, `sortRandom` (Fisher-Yates shuffle).
   - [_InitSetting.js](src/classes/_InitSetting.js) — `DEV_MODE` and `AUTO_RANDOM_HERO` toggles.
-- [src/components/](src/components/) — small presentational components:
+- [src/components/](src/components/) — presentational components:
   - [CardComponent.js](src/components/CardComponent.js) — renders one card (image from `public/img/card_<action>.png`, hidden as `back_of_card`, swaps to `_2` variants in death-match mode).
   - [PlayerComponent.js](src/components/PlayerComponent.js) — renders an opponent's seat: avatar, HP hearts, status icons, hand (face-down), field cards, and a speech-bubble derived from `lastLog`.
   - [DebugTool.js](src/components/DebugTool.js) — admin-only controls.
+  - [modals/ConfirmCardModal.js](src/components/modals/ConfirmCardModal.js) — `#confirmModal`: play/equip/give/discard the selected hand card.
+  - [modals/DetailModal.js](src/components/modals/DetailModal.js) — `#detailModal`: inspect a card; conditional action buttons (harvest, judgement, carrier, pick, discard).
+  - [modals/OtherModal.js](src/components/modals/OtherModal.js) — `#otherModal`: generic HTML content popup.
+  - [modals/PickHeroModal.js](src/components/modals/PickHeroModal.js) — `#pickHeroModal`: warlord selection; static backdrop when `isJoJu`.
+  - [modals/EndgameModal.js](src/components/modals/EndgameModal.js) — `#endgameModal`: victory/defeat title + per-player stat cards.
 - [public/img/](public/img/) — card and hero artwork. **Filenames follow strict conventions** (see below).
 - [src/audio/](src/audio/) — sound assets imported by `Audio.js`.
 
@@ -130,7 +145,7 @@ The `Player` class lives at [src/classes/Player.js](src/classes/Player.js) and i
 2. Add a `masterTrans[action] = { name, desc }` entry (Thai). If the action already exists, you can skip this.
 3. Drop `card_<action>.png` into [public/img/](public/img/).
 4. If it should be playable on the judgement zone, add the action name to `canBeplaceOnJudgement` in [Card.js](src/classes/Card.js).
-5. If it needs a sound, map it in `playSoundByAction` in [src/App.js](src/App.js).
+5. If it needs a sound, map it in `playSoundByAction` in [src/classes/playSoundByAction.js](src/classes/playSoundByAction.js).
 
 ### Adding a new warlord
 
@@ -142,7 +157,7 @@ The `Player` class lives at [src/classes/Player.js](src/classes/Player.js) and i
 
 ### State mutation pattern
 
-Always follow the existing pattern in `App.js`:
+All handlers live in [src/hooks/useGameActions.js](src/hooks/useGameActions.js). Follow the existing pattern:
 
 ```js
 const handlerClicked = () => {
@@ -157,14 +172,14 @@ const handlerClicked = () => {
 }
 ```
 
-The helper functions both **mutate the passed `state` object in place** AND call `setX` for optimistic local rendering. Don't break this dual-write — Firestore replay depends on both.
+The helper functions (`addLog`, `addCardToTrash`, `playerTakeDamage`, etc.) both **mutate the passed `state` object in place** AND call `setX` for optimistic local rendering. Don't break this dual-write — Firestore replay depends on both.
 
 ### Log messages are also a protocol
 
 Log strings drive UI behavior:
 
 - [PlayerComponent.js](src/components/PlayerComponent.js) `bubbleText()` parses the last log for substrings like `"ใช้การ์ด"`, `"จั่วการ์ด"`, `"จั่วการ์ดตัดสิน"`, `"ทิ้งการ์ด"`, `"ได้รับความเสียหาย"` to render a per-player speech bubble.
-- The `useEffect` watching `log` in [App.js](src/App.js) plays sounds and shows win/lose modals based on Thai substrings (`"กบฏได้รับชัยชนะ"` etc.).
+- [useLogWatcher.js](src/hooks/useLogWatcher.js) watches `log` and plays sounds / shows win/lose modals based on Thai substrings (`"กบฏได้รับชัยชนะ"` etc.).
 
 When changing log wording, **search for the old phrase first** — UI logic likely depends on it.
 
@@ -181,12 +196,12 @@ When changing log wording, **search for the old phrase first** — UI logic like
 
 ## Working with this repo
 
-- **Whole files are large.** [src/App.js](src/App.js) is ~1.7k lines and [src/classes/Warlord.js](src/classes/Warlord.js) is ~230 lines with very long Thai HTML descriptions per warlord (read attempts may exceed token limits). Use `Grep`/`offset+limit` reads, not full-file reads.
+- **Large files.** [src/hooks/useGameActions.js](src/hooks/useGameActions.js) is ~1.1k lines (all handlers + mutators) and [src/classes/Warlord.js](src/classes/Warlord.js) is ~230 lines with very long Thai HTML descriptions per warlord. [src/App.js](src/App.js) is now ~550 lines. Use `Grep`/`offset+limit` reads for these, not full-file reads.
 - **No real tests, no types, no lint enforcement.** Verify changes by running `npm start` and clicking through the flow you touched. The default CRA `App.test.js` exists but is broken — don't trust `npm test` as a CI gate.
 - **Firebase config is committed** in [src/firebase.js](src/firebase.js). Treat it as the dev project — don't add secrets that shouldn't be public; if a separate prod project is created later, rotate it through env vars.
 - The repository uses CRLF on Windows; preserve existing line endings.
 - A stale [build/](build/) directory is committed to disk (gitignored, won't be pushed) — safe to ignore unless you need to test the prod bundle, in which case re-run `npm run build`.
-- The five `useEffect` hooks in [App.js](src/App.js) cover: (1) initial Firestore subscription + fetch, (2) death-match drum start, (3) restart-match handling, (4) "it's now my turn" intro audio + auto-judgement modals, (5) the big log-watcher that drives SFX and win/lose detection. When changing log strings, re-read effect #5.
+- **Effect locations after refactor:** App.js has 3 effects: (1) `rule?.deathMatch` drum start, (2) `rule?.restartMatch` reset, (3) `isMyTurn` intro audio + auto-judgement modals. Two effects moved to hooks: initial Firestore subscription is in `useRoomSync`; the log-watcher (SFX + win/lose) is in `useLogWatcher`. When changing log strings, re-read `useLogWatcher.js`.
 
 ## Further docs
 
@@ -206,7 +221,7 @@ If you're picking up where someone else left off, do this in order:
 1. Read this entire CLAUDE.md once.
 2. Skim [docs/game-rules.md](docs/game-rules.md) to understand what the user means by "turn", "judgement", "death match", etc.
 3. Skim [docs/data-model.md](docs/data-model.md) so you can read a Firestore room dump.
-4. Open [src/App.js](src/App.js) and search for the handler that maps to whatever the user is asking about. Naming convention: `<verb>Clicked` (e.g. `endTurnClicked`, `drawClicked`, `judgementActionClicked`).
+4. Open [src/hooks/useGameActions.js](src/hooks/useGameActions.js) and search for the handler that maps to whatever the user is asking about. Naming convention: `<verb>Clicked` (e.g. `endTurnClicked`, `drawClicked`, `judgementActionClicked`). App.js now only contains UI layout and `useState` declarations.
 5. Run `npm start`, open `http://localhost:3000/?roomId=<existing>&sessionId=<some>&user=admin`, and use the ADMIN dropdown to set up a state you can experiment with. There's no seed script besides the DebugTool buttons.
 6. Before changing log strings or moving an existing flow, grep for the Thai phrase — it's often parsed elsewhere.
 7. After non-trivial changes, click through a full turn cycle in the browser. There are no automated tests to catch regressions.

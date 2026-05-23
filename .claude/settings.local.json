@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx --no-install react-scripts build)",
+      "Bash(awk 'END { print NR }' src/App.js)",
+      "Bash(awk 'NR<132 || NR>1132' src/App.js)",
+      "Bash(grep -E \"no-unused-vars|is not defined|src\\\\\\\\\\\\\\\\App\\\\.js\")",
+      "Bash(awk 'END { print \"App.js:\", NR }' src/App.js)",
+      "Bash(awk 'END { print \"useGameActions.js:\", NR }' src/hooks/useGameActions.js)"
+    ]
+  }
+}
