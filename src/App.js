@@ -18,6 +18,7 @@ import useRoomSync from './hooks/useRoomSync'
 import useLogWatcher from './hooks/useLogWatcher'
 import useGameActions from './hooks/useGameActions'
 import Warlord from './classes/Warlord'
+import WarlordTooltip from './components/WarlordTooltip'
 import { stateTrans } from './classes/State'
 
 function App() {
@@ -199,7 +200,9 @@ function App() {
   }
 
   const renderGeneral = () => {
-    return isWarlordPicked ? <img class="img" src={`img/hero_${me.warlord?.name}.png`} alt={me.warlord?.name} onClick={() => avatarClicked(me)} /> : <img class="img" src="img/card_back_of_general.png" alt="" />
+    return isWarlordPicked
+      ? <WarlordTooltip warlord={me.warlord} player={me}><img class="img" src={`img/hero_${me.warlord?.name}.png`} alt={me.warlord?.name} onClick={() => avatarClicked(me)} /></WarlordTooltip>
+      : <img class="img" src="img/card_back_of_general.png" alt="" />
   }
 
   const renderLog = (msg) => {

@@ -116,7 +116,8 @@ The `Player` class lives at [src/classes/Player.js](src/classes/Player.js) and i
   - [Utils.js](src/classes/Utils.js) — `delay`, `randomId`, `randomIdOnlynumber`, `sortRandom` (Fisher-Yates shuffle).
   - [_InitSetting.js](src/classes/_InitSetting.js) — `DEV_MODE` and `AUTO_RANDOM_HERO` toggles.
 - [src/components/](src/components/) — presentational components:
-  - [CardComponent.js](src/components/CardComponent.js) — renders one card (image from `public/img/card_<action>.png`, hidden as `back_of_card`, swaps to `_2` variants in death-match mode).
+  - [CardComponent.js](src/components/CardComponent.js) — renders one card (image from `public/img/card_<action>.png`, hidden as `back_of_card`, swaps to `_2` variants in death-match mode). **Hover shows a fixed-position tooltip** (card image + Thai name + description). Uses `useLayoutEffect` + `visibility` (not `display:none`) so actual rendered height is measurable for viewport clamping.
+  - [WarlordTooltip.js](src/components/WarlordTooltip.js) — wrapper component that shows a hover tooltip with warlord portrait, kingdom, live HP hearts, and skill description. Uses the same `useLayoutEffect` viewport-clamping pattern as `CardComponent`. Wrap any warlord `<img>` with `<WarlordTooltip warlord={...} player={...}>`.
   - [PlayerComponent.js](src/components/PlayerComponent.js) — renders an opponent's seat: avatar, HP hearts, status icons, hand (face-down), field cards, and a speech-bubble derived from `lastLog`.
   - [DebugTool.js](src/components/DebugTool.js) — admin-only controls.
   - [modals/ConfirmCardModal.js](src/components/modals/ConfirmCardModal.js) — `#confirmModal`: play/equip/give/discard the selected hand card.

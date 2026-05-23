@@ -2,6 +2,7 @@ import classNames from "classnames"
 import Player from '../classes/Player'
 import { mapMasterDeck, replaceTrans } from '../classes/Card'
 import CardComponent from './CardComponent'
+import WarlordTooltip from './WarlordTooltip'
 import { replaceStateTrans, stateTrans, stateTypes } from "../classes/State"
 
 export default function PlayerComponent({ players, rule, zone, me, selectedCard, showViewCard, avatarClicked, lastLog }) {
@@ -15,7 +16,9 @@ export default function PlayerComponent({ players, rule, zone, me, selectedCard,
   const isDying = player.hp <= 0
   const isDead = player.hp <= 0 && (player?.cards.length === 0 && player.fieldCards.length === 0 && player.judgementCards.length === 0)
   const isMeDead = me && me.hp <= 0 && (me?.cards.length === 0 && me.fieldCards.length === 0 && me.judgementCards.length === 0)
-  let _avatar = player.warlord?.name ? <img class="avatar-img" alt={player.warlord.name} src={`img/hero_${player.warlord.name}.png`} /> : <i class="fa fa-user"></i>
+  let _avatar = player.warlord?.name
+    ? <WarlordTooltip warlord={player.warlord} player={player}><img class="avatar-img" alt={player.warlord.name} src={`img/hero_${player.warlord.name}.png`} /></WarlordTooltip>
+    : <i class="fa fa-user"></i>
   let avatar = isDying ? <img class="avatar-img" src="img/dead_icon.png" /> : _avatar
   
   const teamText = isMe || isDead || player.team === "emperor" ? `[${Player.showTeam(player)}]` : ""
