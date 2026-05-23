@@ -563,3 +563,306 @@ code {
     opacity: 0;
   }
 }
+
+/* ============================================================
+   PARCHMENT + GOLD THEME (visual overrides only — no layout)
+   To revert, delete everything below this line.
+   ============================================================ */
+
+:root {
+  --parchment-light: #f3e5c3;
+  --parchment: #e8d4a2;
+  --parchment-dark: #c9a96a;
+  --gold: #c9a227;
+  --gold-bright: #e6c34a;
+  --gold-deep: #8a6a1f;
+  --ink: #3a2a14;
+  --crimson: #8b1e1e;
+  --crimson-dark: #5c0d0d;
+  --wood-dark: #3a2412;
+  --wood: #5a3a1f;
+}
+
+body {
+  background:
+    radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(58,36,18,0.45) 100%),
+    radial-gradient(circle at 20% 15%, rgba(255,240,200,0.45), transparent 45%),
+    radial-gradient(circle at 80% 85%, rgba(120,80,30,0.3), transparent 55%),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.35  0 0 0 0 0.25  0 0 0 0 0.1  0 0 0 0.18 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"),
+    linear-gradient(135deg, #f0d9a8 0%, #d4b078 100%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.container {
+  background: transparent !important;
+}
+
+.left-col,
+.right-col {
+  background:
+    linear-gradient(180deg, rgba(58,36,18,0.92), rgba(90,58,31,0.88)) !important;
+  border-left: 2px solid var(--gold);
+  border-right: 2px solid var(--gold);
+  color: var(--parchment-light);
+  box-shadow: inset 0 0 36px rgba(0,0,0,0.5);
+}
+
+.zone {
+  background:
+    radial-gradient(ellipse at center, rgba(255,240,200,0.45), transparent 70%),
+    linear-gradient(135deg, #e8d4a2, #c9a96a) !important;
+  border: 3px solid var(--gold-deep);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,220,150,0.5),
+    inset 0 0 60px rgba(90,40,10,0.28);
+}
+
+/* Player frames */
+.player {
+  background: linear-gradient(135deg, #f6e8c6 0%, #d8b878 100%) !important;
+  border: 2px solid var(--gold-deep) !important;
+  border-radius: 12px !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,220,150,0.55),
+    inset 0 0 22px rgba(120,80,30,0.18),
+    0 4px 10px rgba(0,0,0,0.25) !important;
+}
+
+.player .hand-card-zone,
+.player .field-card-zone {
+  border-color: rgba(138, 106, 31, 0.45) !important;
+}
+
+.is-me {
+  border: 3px solid var(--gold-bright) !important;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,235,170,0.7),
+    0 0 0 1px var(--gold-deep),
+    0 0 22px rgba(230,195,74,0.65),
+    0 4px 10px rgba(0,0,0,0.3) !important;
+}
+
+.player-name {
+  font-family: Georgia, serif;
+  color: var(--ink);
+  letter-spacing: 0.3px;
+}
+
+/* HP hearts — were rendering as tiny blocks; bump size + add stroke */
+.player-hp .fa-heart,
+.player-hp .fa-heart-o {
+  font-size: 15px;
+  margin-right: 1px;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+}
+.player-hp .fa-heart {
+  color: #c41e1e;
+}
+.player-hp .fa-heart-o {
+  color: #6b4226;
+  text-shadow: none;
+}
+.warlord-hp .fa-heart {
+  font-size: 22px;
+  color: #c41e1e;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.4);
+  margin: 0 1px;
+}
+
+/* Turn banner */
+.announcer-block {
+  text-align: center;
+  padding-top: 8px;
+}
+.announcer-block h1 {
+  display: inline-block;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-weight: bold;
+  font-size: 28px;
+  color: #fff5d6;
+  background: linear-gradient(180deg, #a82828 0%, #6a1212 100%);
+  padding: 8px 56px;
+  border: 3px solid var(--gold-bright);
+  border-radius: 4px;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,255,255,0.15),
+    inset 0 0 18px rgba(0,0,0,0.4),
+    0 4px 10px rgba(0,0,0,0.45);
+  text-shadow: 0 2px 2px rgba(0,0,0,0.7);
+  position: relative;
+  margin: 4px 0 6px 0;
+  letter-spacing: 1px;
+}
+.announcer-block h1::before,
+.announcer-block h1::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 90px;
+  height: 0;
+  border-top: 2px solid var(--gold-bright);
+}
+.announcer-block h1::before { right: 100%; margin-right: 10px; }
+.announcer-block h1::after  { left: 100%;  margin-left: 10px; }
+.announcer-block h5 {
+  color: var(--ink);
+  font-style: italic;
+  margin-top: 6px;
+}
+
+/* Log scroll */
+.log-wrapper {
+  background:
+    linear-gradient(180deg, rgba(255,243,210,0.96), rgba(225,190,130,0.92)) !important;
+  border: 2px solid var(--gold-deep);
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: var(--ink) !important;
+  font-family: Georgia, serif;
+  font-size: 13px;
+  line-height: 1.55;
+  box-shadow:
+    inset 0 0 0 1px rgba(255,220,150,0.55),
+    inset 0 0 22px rgba(120,80,30,0.2),
+    0 4px 10px rgba(0,0,0,0.3);
+}
+.log-wrapper * {
+  color: var(--ink) !important;
+}
+
+/* Wood-tray hand */
+.my-hand {
+  background: linear-gradient(180deg, #4a2812 0%, #2d180a 100%) !important;
+  border-top: 3px solid var(--gold-deep) !important;
+  border-bottom: none !important;
+  box-shadow:
+    inset 0 4px 12px rgba(0,0,0,0.6),
+    inset 0 0 0 1px rgba(201,162,39,0.35);
+}
+.my-turn {
+  background: linear-gradient(180deg, #4a2812 0%, #2d180a 100%) !important;
+  box-shadow:
+    inset 0 4px 12px rgba(0,0,0,0.6),
+    inset 0 0 0 2px var(--gold-bright),
+    0 0 28px rgba(230,195,74,0.5) !important;
+}
+
+/* Gradient buttons with gold rim */
+.btn-primary {
+  background: linear-gradient(180deg, #2c5fa8 0%, #143b76 100%) !important;
+  border: 1px solid var(--gold-deep) !important;
+  color: #fff5d6 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3);
+}
+.btn-success {
+  background: linear-gradient(180deg, #3a7a3a 0%, #1f4c1f 100%) !important;
+  border: 1px solid var(--gold-deep) !important;
+  color: #fff5d6 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3);
+}
+.btn-danger {
+  background: linear-gradient(180deg, #a82828 0%, #6a1212 100%) !important;
+  border: 1px solid var(--gold-deep) !important;
+  color: #fff5d6 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3);
+}
+.btn-warning {
+  background: linear-gradient(180deg, #d8a324 0%, #8a6a1f 100%) !important;
+  border: 1px solid var(--gold-deep) !important;
+  color: #fff5d6 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3);
+}
+.btn-info {
+  background: linear-gradient(180deg, #6e9caa 0%, #2f5566 100%) !important;
+  border: 1px solid var(--gold-deep) !important;
+  color: #fff5d6 !important;
+  text-shadow: 0 1px 2px rgba(0,0,0,0.6);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.2), 0 2px 4px rgba(0,0,0,0.3);
+}
+.btn:hover {
+  filter: brightness(1.1);
+}
+
+/* Warlord pick cards */
+.warlord-pick-inner-wrapper {
+  background: linear-gradient(135deg, #f6e8c6 0%, #d8b878 100%) !important;
+  border: 2px solid var(--gold-deep);
+  box-shadow:
+    inset 0 0 0 1px rgba(255,220,150,0.55),
+    0 6px 14px rgba(0,0,0,0.35) !important;
+}
+.warlord-title {
+  font-family: Georgia, serif;
+  color: var(--ink);
+  letter-spacing: 0.5px;
+}
+.warlord-kingdom {
+  color: var(--gold-deep);
+}
+
+/* Right sidebar: warlord panel */
+.right-col .card-general .warlord-title {
+  color: var(--gold-bright);
+  text-shadow: 0 1px 2px rgba(0,0,0,0.7);
+  font-size: 22px;
+}
+.right-col .card-general .warlord-kingdom {
+  color: var(--parchment-light);
+}
+.right-col .warlord-desc,
+.right-col .card-team,
+.right-col > .card-general {
+  color: var(--parchment-light);
+}
+
+/* Speech bubble — parchment instead of white */
+.bubble {
+  background: linear-gradient(180deg, #fff8e0, #f3e5c3) !important;
+  color: var(--ink) !important;
+}
+
+/* Modals */
+.modal-content {
+  background: linear-gradient(135deg, #f6e8c6 0%, #d8b878 100%);
+  border: 3px solid var(--gold-deep);
+  color: var(--ink);
+  box-shadow: 0 10px 36px rgba(0,0,0,0.7);
+}
+.modal-header,
+.modal-footer {
+  border-color: rgba(138,106,31,0.45);
+}
+.endgame-title {
+  color: var(--crimson-dark);
+  text-shadow: 0 2px 2px rgba(255,220,150,0.5);
+}
+
+/* Card hover — slightly nicer lift */
+.card-block:hover {
+  border: 1px solid var(--gold-deep);
+  box-shadow: 0 6px 12px rgba(0,0,0,0.35);
+}
+
+/* Selected card / player highlight (was almost-black shadow) */
+.card-selected,
+.player-selected {
+  border-color: var(--gold-bright) !important;
+  box-shadow:
+    0 0 0 2px var(--gold-bright),
+    0 0 18px rgba(230,195,74,0.65) !important;
+}
+
+/* Dev / status text in the left rail */
+.left-col {
+  color: var(--parchment-light);
+}
+.dev-tool-wrapper {
+  color: var(--parchment-light);
+}
