@@ -12,15 +12,17 @@ export const fetchInitData = async ({ roomId }) => {
 		})
 }
 
-export const updateData = async (data = {}, { deck, players, rule, log }, { roomId }) => {
+export const updateData = async (data = {}, { deck, players, rule, log }, { roomId, dragAttack = null }) => {
 	try {
 		const update = {
 			deck,
 			players,
 			rule,
-			log, 
-			...data
+			log,
+			...data,
 		}
+		// Always clear the drag indicator unless the caller explicitly passes dragAttack
+		update.rule = { ...update.rule, dragAttack }
 
 		console.log("BEFORE UPDATE ", update)
 		if (!DEV_MODE) updateDoc(doc(collection(db, "test2"), roomId), { ...update })

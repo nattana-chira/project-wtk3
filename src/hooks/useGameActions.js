@@ -1026,6 +1026,31 @@ export default function useGameActions(deps) {
     delay(() => updateData(state, mainState, { roomId }))
   }
 
+  // Cards that can be drag-targeted to a specific player
+  const DRAG_TARGETABLE = ["attack", "duel", "steal", "burn_bridge", "acedia", "brotherhood"]
+
+  const isCardDragTargetable = (card) => card && DRAG_TARGETABLE.includes(card.action)
+
+  const dragAttackHandler = (targetPlayer, card) => {
+    const state = {
+      log: log,
+      rule: rule,
+      players: players,
+    }
+
+    playSoundByAction(card.action)
+    state.rule.battleZone = [...state.rule.battleZone, card.id]
+    setRule(state.rule)
+
+    removeCardFromHand(card, me, state)
+    resetSelector()
+
+    addLog(state, `ใช้การ์ด ${card.showFullName()} เลือกเป้าหมาย ${Player.showRoleName(targetPlayer)}`)
+
+    const dragAttack = { fromSessionId: me.sessionId, toSessionId: targetPlayer.sessionId }
+    delay(() => updateData(state, mainState, { roomId, dragAttack }))
+  }
+
   return {
     showViewCard,
     cardClicked,
@@ -1063,5 +1088,7 @@ export default function useGameActions(deps) {
     xuYouCardReveal,
     luZhiMasterClick,
     luZhiMasterReveal,
+    dragAttackHandler,
+    isCardDragTargetable,
   }
 }

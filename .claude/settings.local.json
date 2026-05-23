@@ -6,7 +6,13 @@
       "Bash(awk 'NR<132 || NR>1132' src/App.js)",
       "Bash(grep -E \"no-unused-vars|is not defined|src\\\\\\\\\\\\\\\\App\\\\.js\")",
       "Bash(awk 'END { print \"App.js:\", NR }' src/App.js)",
-      "Bash(awk 'END { print \"useGameActions.js:\", NR }' src/hooks/useGameActions.js)"
+      "Bash(awk 'END { print \"useGameActions.js:\", NR }' src/hooks/useGameActions.js)",
+      "Bash(npm start *)",
+      "Bash(npx react-scripts *)",
+      "Bash(grep -E \"src\\\\\\\\\\\\\\\\App|src\\\\\\\\\\\\\\\\components\\\\\\\\\\\\\\\\Card|src\\\\\\\\\\\\\\\\components\\\\\\\\\\\\\\\\Player|src\\\\\\\\\\\\\\\\hooks\\\\\\\\\\\\\\\\useGame|src\\\\\\\\\\\\\\\\classes\\\\\\\\\\\\\\\\Api|src\\\\\\\\\\\\\\\\classes\\\\\\\\\\\\\\\\Data\")",
+      "Bash(grep -E \"src\\\\\\\\\\\\\\\\App|src\\\\\\\\\\\\\\\\components\\\\\\\\\\\\\\\\Card|src\\\\\\\\\\\\\\\\components\\\\\\\\\\\\\\\\Player\")",
+      "Bash(grep -v \"^$\")",
+      "Bash(grep -E \"src\\\\\\\\\\\\\\\\App|src\\\\\\\\\\\\\\\\components\\\\\\\\\\\\\\\\Card|src\\\\\\\\\\\\\\\\components\\\\\\\\\\\\\\\\Player|ERROR in\")"
     ]
   }
 }

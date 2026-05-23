@@ -59,6 +59,7 @@ export const initState = {
     counter: 1,
     deathMatch: false,
     restartMatch: false,
+    dragAttack: null,
     ramdomToPickWarlords: ramdomToPickWarlords
 
     // ramdomToPickWarlords: [

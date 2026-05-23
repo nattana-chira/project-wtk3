@@ -1,7 +1,7 @@
 import './App.css'
 import Player from './classes/Player'
 import { mapMasterDeck, renderSymbolColor } from './classes/Card'
-import { useState, useEffect, useRef, Fragment } from "react"
+import { useState, useEffect, useLayoutEffect, useRef, Fragment } from "react"
 import { resetInit } from './classes/DataInit'
 import classNames from "classnames"
 import { delay } from './classes/Utils'
@@ -20,6 +20,42 @@ import useGameActions from './hooks/useGameActions'
 import Warlord from './classes/Warlord'
 import WarlordTooltip from './components/WarlordTooltip'
 import { stateTrans } from './classes/State'
+
+function AttackLine({ fromSessionId, toSessionId }) {
+  const [line, setLine] = useState(null)
+
+  useLayoutEffect(() => {
+    const from = document.querySelector(`[data-session-id="${fromSessionId}"]`)
+    const to = document.querySelector(`[data-session-id="${toSessionId}"]`)
+    if (!from || !to) return
+    const fr = from.getBoundingClientRect()
+    const tr = to.getBoundingClientRect()
+    setLine({
+      x1: fr.left + fr.width / 2,
+      y1: fr.top + fr.height / 2,
+      x2: tr.left + tr.width / 2,
+      y2: tr.top + tr.height / 2,
+    })
+  }, [fromSessionId, toSessionId])
+
+  if (!line) return null
+
+  return (
+    <svg className="attack-line-svg">
+      <defs>
+        <marker id="atk-arrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+          <polygon points="0 0, 10 3.5, 0 7" fill="red" />
+        </marker>
+      </defs>
+      <line
+        x1={line.x1} y1={line.y1} x2={line.x2} y2={line.y2}
+        stroke="red" strokeWidth="3" strokeDasharray="10,5"
+        markerEnd="url(#atk-arrow)"
+        className="attack-line-path"
+      />
+    </svg>
+  )
+}
 
 function App() {
   const [test, setTest] = useState(0)
@@ -44,6 +80,8 @@ function App() {
   const [pointCard, setPointCard] = useState(null)
   const [xuYouCards, setXuYouCards] = useState([])
   const [luZhiMaster, setLuZhiMaster] = useState(null)
+  const [dragCard, setDragCard] = useState(null)
+  const [dragOverZone, setDragOverZone] = useState(null)
 
   const modalTrigger = useRef()
   const modalClose = useRef()
@@ -166,6 +204,8 @@ function App() {
     xuYouCardReveal,
     luZhiMasterClick,
     luZhiMasterReveal,
+    dragAttackHandler,
+    isCardDragTargetable,
   } = useGameActions({
     log, rule, players, deck,
     me, mainState, selectedCard,
@@ -192,10 +232,22 @@ function App() {
     log,
   })
 
+  const isDragOver = (zone) => {
+    if (!dragOverZone) return false
+    const zonePlayer = players.find(p => p.sitZone === zone)
+    return zonePlayer?.sessionId === dragOverZone
+  }
+
   const renderPlayerComponent = (zone) => {
+    const zonePlayer = players.find(p => p.sitZone === zone)
+    const isValidDragTarget = dragCard && zonePlayer && zonePlayer.sessionId !== me?.sessionId && zonePlayer.hp > 0
     return <PlayerComponent
       lastLog={lastLog} rule={rule} players={players} zone={zone} me={me} selectedCard={selectedCard}
       showViewCard={showViewCard} avatarClicked={avatarClicked}
+      onDragDrop={isValidDragTarget ? (player) => { dragAttackHandler(player, dragCard); setDragCard(null); setDragOverZone(null) } : null}
+      onDragEnter={isValidDragTarget ? () => setDragOverZone(zonePlayer.sessionId) : null}
+      onDragLeave={isValidDragTarget ? () => setDragOverZone(null) : null}
+      isDragOver={isDragOver(zone)}
     />
   }
 
@@ -315,14 +367,23 @@ function App() {
               </div>
               <div class={classNames("col my-hand", { "my-turn": isMyTurn })}>
                 {myCards.map((card) => (
-                  <CardComponent card={card} classes="blink_me_sec" selectedCard={selectedCard} onClick={cardClicked} deathMatch={rule.deathMatch} />
+                  <CardComponent
+                    card={card}
+                    classes="blink_me_sec"
+                    selectedCard={selectedCard}
+                    onClick={cardClicked}
+                    deathMatch={rule.deathMatch}
+                    isDraggable={isMyTurn && isCardDragTargetable(card)}
+                    onDragStart={(c) => setDragCard(c)}
+                    onDragEnd={() => { setDragCard(null); setDragOverZone(null) }}
+                  />
                 ))}
               </div>
             </div>
           </div>
 
           <div class="col-2 right-col">
-            <div class="card-general">
+            <div class="card-general" data-session-id={me?.sessionId}>
               {renderGeneral()}
               {me?.warlord && (
                 <Fragment>
@@ -543,6 +604,14 @@ function App() {
           </div>
         </div>
       </div>
+
+      {rule?.dragAttack && (
+        <AttackLine
+          fromSessionId={rule.dragAttack.fromSessionId}
+          toSessionId={rule.dragAttack.toSessionId}
+        />
+      )}
+
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import classNames from "classnames"
 import { Fragment, useLayoutEffect, useRef, useState } from "react"
 
-export default function CardComponent({ card, deathMatch, selectedCard, isHidden, classes="" , onClick = () => {}}) {
+export default function CardComponent({ card, deathMatch, selectedCard, isHidden, classes="" , onClick = () => {}, isDraggable = false, onDragStart = () => {}, onDragEnd = () => {} }) {
   let imgSrc = isHidden ? "back_of_card" : card?.action
   const deathMatchCards = ["peach", "wine", "brotherhood"]
   const [hovered, setHovered] = useState(false)
@@ -25,16 +25,26 @@ export default function CardComponent({ card, deathMatch, selectedCard, isHidden
     setTipStyle({ left: x, top: y })
   }, [hovered])
 
+  const handleDragStart = (e) => {
+    e.dataTransfer.setData("cardId", String(card?.id))
+    e.dataTransfer.effectAllowed = "move"
+    onDragStart(card)
+  }
+
   return (
     <div
       ref={cardRef}
+      draggable={isDraggable}
       className={classNames("card-block d-inline-block " + classes, {
         "card-selected": card?.id === selectedCard?.id,
-        "font-red": card?.symbol === "heart" || card?.symbol === "diamond"
+        "font-red": card?.symbol === "heart" || card?.symbol === "diamond",
+        "card-draggable": isDraggable,
       })}
       onClick={() => onClick(card)}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onDragStart={handleDragStart}
+      onDragEnd={onDragEnd}
     >
       <img class="img" src={"img/card_" + imgSrc + ".png"} alt={card?.showAlt()} />
 

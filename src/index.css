@@ -969,3 +969,41 @@ body {
 .warlord-hover-tip.warlord-hover-tip--visible {
   visibility: visible;
 }
+
+/* ── Drag-to-attack ── */
+
+/* Cursor hint on draggable cards */
+.card-draggable {
+  cursor: grab;
+}
+
+
+
+/* Glow on valid drop targets */
+.player.drag-target-over {
+  outline: 3px solid #ff3333;
+  outline-offset: 4px;
+  border-radius: 8px;
+  box-shadow: 0 0 18px 4px rgba(255, 50, 50, 0.55);
+  transition: box-shadow 0.15s, outline 0.15s;
+}
+
+/* SVG overlay for the red attack line */
+.attack-line-svg {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9998;
+}
+
+/* Animated dash on the attack line */
+@keyframes attack-dash {
+  to { stroke-dashoffset: -30; }
+}
+
+.attack-line-path {
+  animation: attack-dash 0.5s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(255, 0, 0, 0.8));
+}

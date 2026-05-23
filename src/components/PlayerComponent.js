@@ -5,7 +5,7 @@ import CardComponent from './CardComponent'
 import WarlordTooltip from './WarlordTooltip'
 import { replaceStateTrans, stateTrans, stateTypes } from "../classes/State"
 
-export default function PlayerComponent({ players, rule, zone, me, selectedCard, showViewCard, avatarClicked, lastLog }) {
+export default function PlayerComponent({ players, rule, zone, me, selectedCard, showViewCard, avatarClicked, lastLog, onDragDrop = null, onDragEnter = null, onDragLeave = null, isDragOver = false }) {
   const player = players.find(_player => _player.sitZone === zone)
   const isTheirTurn = player && player?.sessionId === rule?.playerPhaseSessionId
 
@@ -106,8 +106,32 @@ export default function PlayerComponent({ players, rule, zone, me, selectedCard,
     return false
   } 
 
+  const handleDragOver = (e) => {
+    if (onDragDrop) e.preventDefault()
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    if (onDragDrop) onDragDrop(player)
+  }
+
+  const handleDragEnter = (e) => {
+    if (onDragEnter) { e.preventDefault(); onDragEnter() }
+  }
+
+  const handleDragLeave = () => {
+    if (onDragLeave) onDragLeave()
+  }
+
   return (
-    <div className={classNames(`player arrow ${arrowClasses(zone)[0]}`, { "is-me": isMe })}>
+    <div
+      data-session-id={player.sessionId}
+      className={classNames(`player arrow ${arrowClasses(zone)[0]}`, { "is-me": isMe, "drag-target-over": isDragOver })}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+    >
       {lastLog?.includes(Player.showRoleName(player)) && bubbleText() && (
         <div className="bubble right" dangerouslySetInnerHTML={{ __html: bubbleText() }}></div>
       )}
