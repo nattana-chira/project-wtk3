@@ -78,12 +78,17 @@ export default function PlayerComponent({ players, rule, zone, me, selectedCard,
     if (lastLog.includes("จั่วการ์ด")) return backCardElement
 
     if (lastLog.includes("ใช้การ์ด")) {
+      if (lastLog.includes(`เลือกเป้าหมาย ${Player.showRoleName(player)}`)) return false
+
       const transLog = replaceTrans(lastLog)
       const index = transLog.indexOf("ใช้การ์ด")
       let cardName = transLog.substr(index + 12).trim()
 
-      if (lastLog.includes("ใส่เป้าหมาย")) 
+      if (lastLog.includes("ใส่เป้าหมาย"))
         cardName = cardName.substr(0, cardName.indexOf(" ใส่เป้าหมาย"))
+
+      if (cardName.includes(" เลือกเป้าหมาย"))
+        cardName = cardName.substr(0, cardName.indexOf(" เลือกเป้าหมาย"))
       
       if (!cardName) return false
       return `<img class="card-block-sm" src="img/card_${cardName}.png" />`
